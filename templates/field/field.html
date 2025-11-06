@@ -1,0 +1,127 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>GO Pichanga</title>
+  <link rel="stylesheet" href="{% static 'field/field.css' %}">
+</head>
+<body>
+
+  <!-- Navbar con icono de filtros -->
+  <header class="topbar">
+    <div class="brand">GO PICHANGA</div>
+    <div class="cta">Conviértete en arrendatario</div>
+
+    {% if request.gp_is_auth %}
+      <form method="post" action="{% url 'users:logout' %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Cerrar sesión</button>
+      </form>
+    {% else %}
+      <a href="{% url 'users:login' %}">Iniciar sesión</a>
+      <a href="{% url 'users:regular_create' %}">Registrarse</a>
+    {% endif %}
+
+    <div class="right">
+      <!-- Filtros en navbar -->
+      <details class="filter-dd" {% if selected_type %}open{% endif %}>
+        <summary class="iconbtn" title="Filtros" aria-label="Filtros">
+          <!-- ícono de embudo -->
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true">
+            <path d="M3 5h18l-7 8v5l-4 1v-6L3 5Z" stroke="#9dd9e2" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <div class="dropdown">
+          <form method="get">
+            <label for="kword">Tipo de cancha</label>
+            <select id="kword" name="kword" class="select">
+              <option value="">Todos</option>
+              {% if type_choices %}
+                {% for code,label in type_choices %}
+                  <option value="{{ code }}" {% if code == selected_type %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              {% else %}
+                <!-- Fallback por si no llegan los choices -->
+                <option value="futbol"   {% if selected_type == 'futbol' %}selected{% endif %}>Fútbol</option>
+                <option value="basket"   {% if selected_type == 'basket' %}selected{% endif %}>Basketball</option>
+                <option value="voley"    {% if selected_type == 'voley' %}selected{% endif %}>Volleyball</option>
+                <option value="tenis"    {% if selected_type == 'tenis' %}selected{% endif %}>Tenis</option>
+                <option value="multiuso" {% if selected_type == 'multiuso' %}selected{% endif %}>Multiuso</option>
+              {% endif %}
+            </select>
+
+            <button type="submit" class="btn">Aplicar</button>
+            {% if selected_type %}
+              <a href="." class="link-clear">Limpiar</a>
+            {% endif %}
+          </form>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <!-- Cards -->
+  <main class="wrap">
+    {% if listado_fields %}
+      <div class="grid">
+
+        {% if request.gp_is_auth %}
+          {% for field in listado_fields %}
+            <a class="card" href="{% url 'booking:detail' field.id %}">
+              <div class="thumb">
+                {% if field.primary_image %}
+                  <img
+                    src="{{ field.primary_image.image.url }}"
+                    alt="Imagen de {{ field.name }}"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <div class="noimg" aria-hidden="true"></div>
+                {% endif %}
+              </div>
+              <div class="meta">
+                <h4 class="name">{{ field.name }}</h4>
+                <p class="desc">{{ field.description|default:"Sin descripción" }}</p>
+                <div class="bottom">
+                  <span class="price">S/ {{ field.price_hour }} / hora</span>
+                  <span class="badge">{{ field.get_type_display }}</span>
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        {% else %}
+          {% for field in listado_fields %}
+            <a class="card" href="{% url 'users:login' %}?next={% url 'booking:detail' field.id %}">
+              <div class="thumb">
+                {% if field.primary_image %}
+                  <img
+                    src="{{ field.primary_image.image.url }}"
+                    alt="Imagen de {{ field.name }}"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <div class="noimg" aria-hidden="true"></div>
+                {% endif %}
+              </div>
+              <div class="meta">
+                <h4 class="name">{{ field.name }}</h4>
+                <p class="desc">{{ field.description|default:"Sin descripción" }}</p>
+                <div class="bottom">
+                  <span class="price">S/ {{ field.price_hour }} / hora</span>
+                  <span class="badge">{{ field.get_type_display }}</span>
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        {% endif %}
+
+      </div>
+    {% else %}
+      <div class="empty">No hay canchas disponibles con el filtro seleccionado.</div>
+    {% endif %}
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,100 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Crear usuario regular</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 24px;
+      }
+      .card {
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+      }
+      .row {
+        margin-bottom: 12px;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+      .btn {
+        padding: 10px 16px;
+        border: 0;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: #0d6efd;
+        color: white;
+      }
+      .errors {
+        background: #ffe5e5;
+        color: #900;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Crear usuario regular</h1>
+
+      {% if form.non_field_errors %}
+      <div class="errors">
+        {% for err in form.non_field_errors %}
+        <div>{{ err }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row">
+          <label for="{{ form.nombre.id_for_label }}">Nombre completo</label>
+          {{ form.nombre }} {{ form.nombre.errors }}
+        </div>
+        <div class="row">
+          <label for="{{ form.email.id_for_label }}">Correo</label>
+          {{ form.email }} {{ form.email.errors }}
+        </div>
+        <div class="row">
+          <label for="{{ form.password.id_for_label }}">Contraseña</label>
+          {{ form.password }} {{ form.password.errors }}
+        </div>
+        <div class="row">
+          <label for="{{ form.telefono.id_for_label }}">Teléfono</label>
+          {{ form.telefono }} {{ form.telefono.errors }}
+        </div>
+        <div class="row">
+          <label for="{{ form.fecha_nacimiento.id_for_label }}"
+            >Fecha de nacimiento</label
+          >
+          {{ form.fecha_nacimiento }} {{ form.fecha_nacimiento.errors }}
+        </div>
+        <div class="row">
+          <label for="{{ form.direccion.id_for_label }}">Dirección</label>
+          {{ form.direccion }} {{ form.direccion.errors }}
+        </div>
+
+        <button class="btn btn-primary" type="submit">Crear</button>
+      </form>
+    </div>
+  </body>
+</html>

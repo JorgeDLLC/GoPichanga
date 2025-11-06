@@ -1,0 +1,126 @@
+:root {
+  --bg: #0b2326; /* fondo general */
+  --card: #112b2f; /* tarjeta */
+  --text: #eaf0f1; /* texto principal */
+  --muted: #a9b6b9; /* texto secundario */
+  --input-bg: #2a4247; /* relleno input */
+  --input-br: #9fb4b9; /* borde input */
+  --btn: #e9e9ec; /* botón claro */
+  --btn-text: #0e1c1f; /* texto botón */
+  --ring: #cfd9dc; /* foco accesible */
+  --radius-lg: 26px;
+  --shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial,
+    sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.wrap {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+}
+
+.card {
+  width: 100%;
+  max-width: 640px;
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: clamp(24px, 6vw, 48px);
+}
+
+.title {
+  text-align: center;
+  line-height: 1.15;
+  margin: 0 0 28px;
+  font-weight: 800;
+  font-size: clamp(26px, 4.6vw, 38px);
+}
+.title small {
+  display: block;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.form-row {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+label {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.input {
+  background: var(--input-bg);
+  border: 2px solid var(--input-bg);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.input::placeholder {
+  color: #c2cacc;
+  opacity: 0.7;
+}
+.input:focus {
+  border-color: var(--input-br);
+  box-shadow: 0 0 0 4px rgba(159, 180, 185, 0.25);
+}
+
+.actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+}
+.btn {
+  border: 0;
+  background: var(--btn);
+  color: var(--btn-text);
+  font-weight: 800;
+  font-size: clamp(18px, 2.8vw, 22px);
+  padding: 14px 28px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.06s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+  min-width: 220px;
+}
+.btn:hover {
+  opacity: 0.95;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.helper {
+  text-align: center;
+  color: var(--muted);
+  margin-top: 18px;
+  font-size: 14px;
+}
+.helper a {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

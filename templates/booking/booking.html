@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GO Pichanga / {{ field.name }}</title>
+    <link rel="stylesheet" href="{% static 'booking/booking.css' %}" />
+  </head>
+  <body class="page">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="brand">GO PICHANGA</div>
+      <nav class="topnav">
+        <a href="#">Conviértete en arrendatario</a>
+        <a href="">Mis reservas</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <h1 class="title">
+        {{ field.name }}
+        <span class="muted">/ {{ field.get_type_display }}</span>
+      </h1>
+
+      <!-- Galería -->
+      <section class="gallery">
+        <figure class="gallery__main">
+          {% if field.primary_image %}
+          <img
+            src="{{ field.primary_image.image.url }}"
+            alt="Imagen principal de {{ field.name }}"
+          />
+          {% else %}
+          <div class="ph">IMAGEN PRINCIPAL</div>
+          {% endif %}
+        </figure>
+
+        <div class="gallery__thumbs">
+          {% if not album.is_primary %} {% for album in field.albums.all %}
+          <figure class="thumb">
+            <img
+              src="{{ album.image.url }}"
+              alt="Imagen de {{ field.name }} {{ forloop.counter }}"
+            />
+          </figure>
+          {% endfor %} {% else %}
+          <!-- place-holders si no hay imágenes -->
+          <div class="thumb ph">IMAGEN</div>
+          <div class="thumb ph">IMAGEN</div>
+          <div class="thumb ph">IMAGEN</div>
+          <div class="thumb ph">IMAGEN</div>
+          {% endif %}
+        </div>
+      </section>
+
+      <!-- Info izquierda + Panel derecha -->
+      <section class="details-grid">
+        <!-- Columna izquierda -->
+        <article class="info">
+          <h2 class="subtitle">
+            Cancha en : <span class="muted">({{ field.address }})</span>
+          </h2>
+
+          <div class="desc">
+            <h3 class="desc__title">DESCRIPCIÓN DEL LOCAL</h3>
+            <p class="desc__text">
+              {{ field.description|default:"Sin descripción disponible." }}
+            </p>
+
+            <ul class="chips">
+              <li class="chip">
+                <span class="chip__label">Tipo</span>
+                <span class="chip__value">{{ field.get_type_display }}</span>
+              </li>
+              <li class="chip">
+                <span class="chip__label">Luces</span>
+                <span class="chip__value"
+                  >{{ field.has_lights|yesno:"Sí,No" }}</span
+                >
+              </li>
+              <li class="chip">
+                <span class="chip__label">Precio/Hora</span>
+                <span class="chip__value"
+                  >S/ {{ field.price_hour|floatformat:2 }}</span
+                >
+              </li>
+            </ul>
+        </article>
+        <!-- Columna derecha -->
+        <aside class="booking">
+          <header class="booking__header">
+            <div class="price">
+              <span class="price__currency">S/</span>
+              <span class="price__value">{{ field.price_hour|floatformat:2 }}</span>
+            </div>
+            <div class="price__note">PRECIO POR HORA</div>
+          </header>
+
+          {% if messages %}
+            <ul>
+              {% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}
+            </ul>
+          {% endif %}
+
+          <form method="post" action="{% url 'payments:checkout' field.id %}">
+            {% csrf_token %}
+            <!-- iguales inputs que arriba -->
+            <input type="date" name="date" required>
+            <input type="time" name="start_time" required>
+            <input type="time" name="end_time" required>
+
+            {% for fe in field.field_equipments.all %}
+              <label>
+                {{ fe.equipment.get_type_display }} (stock {{ fe.stock }}) — S/ {{ fe.price_per_unit }}
+                <input type="number" name="quantity_{{ fe.id }}" min="0" max = "{{ fe.stock }}" value="0">
+              </label>
+            {% endfor %}
+
+            <button type="submit">Continuar al pago</button>
+          </form>
+
+        </aside>
+
+      </section>
+
+      <!-- Mapa -->
+      <section class="map">
+        <h2 class="subtitle">Ubicación</h2>
+        <div class="map__frame">
+          <iframe
+            title="Mapa de {{ field.name }}"
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            src="https://www.google.com/maps?q={{ field.address|urlencode }}&output=embed"
+          >
+          </iframe>
+        </div>
+        <div class="map__link">
+          <a
+            target="_blank"
+            rel="noopener"
+            href="https://www.google.com/maps/search/?api=1&query={{ field.address|urlencode }}"
+          >
+            Abrir en Google Maps
+          </a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

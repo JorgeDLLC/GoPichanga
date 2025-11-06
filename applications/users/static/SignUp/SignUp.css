@@ -1,0 +1,142 @@
+/* ====== Layout base ====== */
+:root {
+  --bg: #0b2125; /* fondo general oscuro */
+  --card: #0f2a2f; /* panel */
+  --ink: #eaf5f6; /* texto principal */
+  --muted: #b6cbd0; /* texto secundario */
+  --field: #2e4a50; /* fondo de inputs */
+  --stroke: #cfe4e7; /* borde claro */
+  --btn: #e7ecef; /* botón claro */
+  --btn-ink: #0b2125; /* texto del botón */
+  --radius: 22px;
+  --radius-sm: 12px;
+  --pad: 28px;
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+}
+body.page {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial,
+    sans-serif;
+  line-height: 1.35;
+}
+
+.center {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.card {
+  width: min(720px, 92vw);
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: clamp(22px, 4vw, 44px);
+}
+
+.title {
+  margin: 0 0 18px 0;
+  font-size: clamp(28px, 3.6vw, 40px);
+  font-weight: 800;
+}
+
+/* ====== Formato para {{ form }} renderizado como <table> ====== */
+/* El form por defecto de Django se renderiza en filas. Lo convertimos en bloques verticales. */
+.form table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 14px; /* espacio entre “filas” */
+}
+.form tr {
+  display: block;
+}
+.form td,
+.form th {
+  display: block;
+  padding: 0;
+  border: 0;
+}
+
+/* Etiquetas */
+.form label {
+  display: block;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* Campos */
+.form input[type="text"],
+.form input[type="email"],
+.form input[type="password"],
+.form input[type="tel"],
+.form select,
+.form textarea {
+  width: 100%;
+  background: var(--field);
+  color: var(--ink);
+  border: 2px solid var(--stroke);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  outline: none;
+  font-size: 16px;
+}
+.form input::placeholder,
+.form textarea::placeholder {
+  color: #a7bcc1;
+}
+
+/* Mensajes de ayuda / errores */
+.form .helptext {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 6px;
+}
+.form ul.errorlist {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0 0;
+  color: #ffd7d7;
+  font-size: 13px;
+}
+
+/* Botón principal */
+.btn-primary {
+  width: 100%;
+  margin-top: 14px;
+  background: var(--btn);
+  color: var(--btn-ink);
+  border: none;
+  border-radius: 14px;
+  padding: 16px 18px;
+  font-weight: 800;
+  font-size: clamp(18px, 2.2vw, 24px);
+  cursor: pointer;
+}
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+/* Línea inferior (texto pequeño) */
+.meta {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 10px;
+}
+.meta a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

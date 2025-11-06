@@ -1,0 +1,201 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>GO PICHANGA · Calendario semanal</title>
+    <style>
+      :root {
+        --bg: #0b1d22;
+        --side: #0f2a30;
+        --text: #e8f0f2;
+        --muted: #90a4ae;
+        --line: #10313a;
+        --free: #5f7682;
+        --busy: #0f2a30;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, Segoe UI, Roboto, Arial;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        min-height: 100vh;
+      }
+      .side {
+        background: var(--side);
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .brand {
+        font-weight: 900;
+        font-size: 24px;
+        letter-spacing: 1px;
+      }
+      .menu a {
+        display: block;
+        padding: 14px 16px;
+        border-radius: 12px;
+        color: var(--text);
+        text-decoration: none;
+        margin: 12px 0;
+        background: #0b2126;
+      }
+      .menu a.active {
+        outline: 2px solid #2b525c;
+      }
+      .logout-form {
+        margin-top: auto;
+      }
+      .logout-form button {
+        width: 100%;
+        background: #0b2126;
+        color: var(--text);
+        border: 1px solid #173941;
+        border-radius: 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+      }
+
+      .main {
+        padding: 28px 34px;
+      }
+      h1 {
+        margin: 0 0 16px;
+      }
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .toolbar a {
+        background: #0b2126;
+        color: var(--text);
+        border: 1px solid #173941;
+        border-radius: 10px;
+        padding: 8px 12px;
+        text-decoration: none;
+      }
+
+      .weekgrid {
+        display: grid;
+        grid-template-columns: 80px repeat(7, 1fr);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .wg-head,
+      .wg-cell {
+        border-right: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        padding: 8px 10px;
+        min-height: 36px;
+      }
+      .wg-head {
+        background: #0e2a30;
+        font-weight: 700;
+      }
+      .wg-head.time {
+        background: #0b2126;
+        color: var(--muted);
+      }
+      .wg-time {
+        background: #0b2126;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        font-size: 12px;
+      }
+      .wg-cell {
+        display: flex;
+        align-items: center;
+      }
+      .free {
+        background: var(--free);
+        color: #fff;
+      }
+      .busy {
+        background: var(--busy);
+      }
+      .wg-cell small {
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="side">
+        <div class="brand">
+          <a
+            href="{% url 'field:list' %}"
+            style="color: inherit; text-decoration: none"
+            >GO PICHANGA</a
+          >
+        </div>
+        <nav class="menu">
+          <a href="{% url 'partners:day' %}">Calendario del día</a>
+          <a href="{% url 'partners:week' %}" class="active"
+            >Calendario semanal</a
+          >
+          <a href="{% url 'partners:month' %}">Resumen mensual</a>
+          <a href="#">Ingresos mensuales</a>
+          <a href="#">Editar local</a>
+        </nav>
+        <form
+          class="logout-form"
+          method="post"
+          action="{% url 'users:logout' %}"
+        >
+          {% csrf_token %}
+          <button type="submit">Cerrar sesión</button>
+        </form>
+      </aside>
+
+      <main class="main">
+        <h1>Calendario semanal</h1>
+
+        <div class="toolbar">
+          <a href="{% url 'partners:week' %}?monday={{ prev_monday }}"
+            >&larr; Semana anterior</a
+          >
+          <a href="{% url 'partners:week' %}?monday={{ this_monday }}"
+            >Semana actual</a
+          >
+          <a href="{% url 'partners:week' %}?monday={{ next_monday }}"
+            >Siguiente semana &rarr;</a
+          >
+          <div style="margin-left: auto; opacity: 0.8">
+            Semana del {{ days.0|date:"d/m" }} al {{ days.6|date:"d/m" }}
+          </div>
+        </div>
+
+        <div class="weekgrid">
+          <!-- Encabezados -->
+          <div class="wg-head time">Hora</div>
+          {% for d in header_days %}
+          <div class="wg-head">{{ d.label }}</div>
+          {% endfor %}
+
+          <!-- Filas -->
+          {% for row in rows_data %}
+          <div class="wg-time">{{ row.time }}</div>
+          {% for cell in row.cells %}
+          <div class="wg-cell {{ cell.status }}">
+            <small>{{ cell.label }}</small>
+          </div>
+          {% endfor %} {% endfor %}
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
