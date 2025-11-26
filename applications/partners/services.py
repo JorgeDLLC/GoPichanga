@@ -1,7 +1,8 @@
 from datetime import datetime, time, timedelta, date
-from calendar import day_name
+from calendar import day_name, monthrange
 from django.utils import timezone
 from django.db.models import Q, Sum, Count
+from django.db.models.functions import TruncDate, ExtractHour
 from applications.booking.models import Booking, BookingStatus
 from applications.field.models import Field
 
@@ -125,4 +126,194 @@ def weekly_grid(partner, monday: date, start_hour=8, end_hour=22):
         'prev_monday': (monday - timedelta(days=7)).strftime("%Y-%m-%d"),
         'next_monday': (monday + timedelta(days=7)).strftime("%Y-%m-%d"),
         'this_monday': week_bounds(timezone.localdate())[0].strftime("%Y-%m-%d"),
+    }
+    
+def _partner_bookings_month(partner, year: int, month: int):
+    """QuerySet de reservas del mes para canchas del partner."""
+    fields = partner_fields(partner)
+    if not fields.exists():
+        return Booking.objects.none()
+
+    # rango del mes
+    last_day = monthrange(year, month)[1]
+    start = datetime(year, month, 1, 0, 0, 0)
+    end = datetime(year, month, last_day, 23, 59, 59)
+
+    statuses = [BookingStatus.CONFIRMED]
+    if hasattr(BookingStatus, "PAID"):
+        statuses.append(BookingStatus.PAID)
+
+    return (
+        Booking.objects.filter(
+            field__in=fields,
+            status__in=statuses,
+            start__gte=start,
+            start__lte=end,
+        )
+        .select_related("user", "field")
+    )
+
+
+def monthly_stats(partner, year: int, month: int):
+    """
+    Calcula métricas para el resumen mensual del partner.
+    Devuelve un dict listo para el template.
+    """
+    qs = _partner_bookings_month(partner, year, month)
+
+    # Ingresos totales
+    total_income = qs.aggregate(total=Sum("total_amount"))["total"] or 0
+
+    # Días con más reservas
+    days_top = (
+        qs.annotate(d=TruncDate("start"))
+        .values("d")
+        .annotate(c=Count("id"))
+        .order_by("-c", "d")[:5]
+    )
+
+    # Usuarios más frecuentes
+    top_users = (
+        qs.values("user__id", "user__nombre")
+        .annotate(c=Count("id"))
+        .order_by("-c", "user__nombre")[:5]
+    )
+
+    # Hora del día más reservada
+    hours = (
+        qs.annotate(h=ExtractHour("start"))
+        .values("h")
+        .annotate(c=Count("id"))
+        .order_by("-c", "h")
+    )
+    top_hour = hours[0]["h"] if hours else None
+
+    # Media de reservas por día del mes (sobre días con al menos 1 reserva)
+    distinct_days = (
+        qs.annotate(d=TruncDate("start"))
+        .values("d")
+        .distinct()
+        .count()
+    )
+    avg_per_day = (qs.count() / distinct_days) if distinct_days else 0
+
+    # Equipamiento más solicitado (si tienes BookingItem con FK a Equipment)
+    # Si aún no lo implementaste, esto quedará vacío sin romper nada.
+    try:
+        from applications.booking.models import BookingItem  # ajusta nombre real
+        top_equipment = (
+            BookingItem.objects.filter(booking__in=qs)
+            .values("equipment__type")
+            .annotate(qty=Sum("quantity"))
+            .order_by("-qty")[:5]
+        )
+    except Exception:
+        top_equipment = []
+
+    # Prev / next month helpers
+    this_month = date(year, month, 1)
+    prev_month = (this_month - timedelta(days=1)).replace(day=1)
+    next_month = (this_month + timedelta(days=32)).replace(day=1)
+
+    return {
+        "total_income": total_income,
+        "days_top": days_top,
+        "top_users": top_users,
+        "top_equipment": top_equipment,
+        "avg_per_day": round(avg_per_day, 2),
+        "top_hour": top_hour,
+        "prev_year": prev_month.year,
+        "prev_month": prev_month.month,
+        "next_year": next_month.year,
+        "next_month": next_month.month,
+    }
+
+def monthly_income_rows(partner, year: int, month: int):
+    """
+    Devuelve filas de ingresos del mes para el partner:
+    [
+      {
+        "user": "Nombre",
+        "start": datetime,
+        "end": datetime,
+        "hours": 1.5,
+        "base_amount": Decimal,
+        "extras_amount": Decimal,
+        "total": Decimal,
+      },
+      ...
+    ]
+    Maneja distintos esquemas de campos sin romper.
+    """
+    qs = _partner_bookings_month(partner, year, month)
+
+    rows = []
+    total_base = 0
+    total_extras = 0
+    total_total = 0
+
+    # Si existe BookingItem con equipment/extras, intentamos sumar
+    try:
+        from applications.booking.models import BookingItem
+        has_booking_item = True
+    except Exception:
+        has_booking_item = False
+
+    for b in qs:
+        # Duración en horas
+        if b.start and b.end:
+            seconds = (b.end - b.start).total_seconds()
+            hours = round(seconds / 3600, 2)
+        else:
+            hours = 0
+
+        # Total
+        total = getattr(b, "total_amount", None)
+        if total is None:
+            total = getattr(b, "amount", 0) or 0
+
+        # Extras (si hay campo específico)
+        extras = getattr(b, "extras_amount", None)
+        if extras is None:
+            # Si no hay campo pero existe BookingItem, podríamos calcularlo aquí.
+            # Lo dejamos simple: suma de (price * qty) marcados como extra, si tu esquema lo soporta.
+            if has_booking_item:
+                try:
+                    extras = (
+                        BookingItem.objects
+                        .filter(booking=b, is_extra=True)
+                        .aggregate(x=Sum("subtotal"))["x"] or 0
+                    )
+                except Exception:
+                    extras = 0
+            else:
+                extras = 0
+
+        # Base
+        base = total - extras if total is not None else 0
+
+        total_base += base
+        total_extras += extras
+        total_total += total
+
+        user_name = getattr(b.user, "nombre", None) or getattr(b.user, "email", "") or f"User {b.user_id}"
+
+        rows.append({
+            "user": user_name,
+            "start": b.start,
+            "end": b.end,
+            "hours": hours,
+            "base_amount": base,
+            "extras_amount": extras,
+            "total": total,
+        })
+
+    # Ordenamos: por fecha
+    rows.sort(key=lambda r: (r["start"] or 0))
+
+    return {
+        "rows": rows,
+        "sum_base": total_base,
+        "sum_extras": total_extras,
+        "sum_total": total_total,
     }

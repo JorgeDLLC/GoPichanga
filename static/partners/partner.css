@@ -1,0 +1,663 @@
+:root {
+  --bg: #0b1d22;
+  --side: #0f2a30;
+  --card: #0f242a;
+  --muted: #90a4ae;
+  --text: #e8f0f2;
+  --free: #5f7682;
+  --busy: #0f2a30;
+  --btn-bg: #0b2126;
+  --btn-border: #173941;
+}
+
+/* Reset básico */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* Layout general sidebar + contenido */
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+
+.side {
+  background: var(--side);
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.brand {
+  margin-bottom: 4px;
+}
+
+.brand-link {
+  font-weight: 900;
+  font-size: 1.4rem;
+  letter-spacing: 1px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* Menú lateral */
+
+.menu {
+  margin-top: 8px;
+}
+
+.menu-link {
+  display: block;
+  padding: 12px 14px;
+  border-radius: 12px;
+  color: var(--text);
+  text-decoration: none;
+  margin-bottom: 10px;
+  background: #0b2126;
+  font-size: 0.9rem;
+}
+
+.menu-link:hover {
+  filter: brightness(1.05);
+}
+
+.menu-link.active {
+  outline: 2px solid #2b525c;
+}
+
+/* Logout lateral */
+
+.logout-form {
+  margin-top: auto;
+}
+
+.logout-form button {
+  width: 100%;
+  background: var(--btn-bg);
+  color: var(--text);
+  border: 1px solid var(--btn-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.logout-form button:hover {
+  filter: brightness(1.05);
+}
+
+/* Contenido principal */
+
+.main {
+  padding: 24px 30px;
+}
+
+/* Títulos */
+
+.main h1 {
+  margin: 0 0 16px;
+  font-size: 1.4rem;
+}
+
+/* Toolbar genérica (para calendarios, etc.) */
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.toolbar a,
+.toolbar button {
+  background: var(--btn-bg);
+  color: var(--text);
+  border: 1px solid var(--btn-border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.toolbar a:hover,
+.toolbar button:hover {
+  filter: brightness(1.05);
+}
+
+.toolbar .toolbar-right {
+  margin-left: auto;
+  opacity: 0.8;
+  font-size: 0.85rem;
+}
+
+/* Lista de slots (día) */
+
+.list {
+  display: grid;
+  gap: 12px;
+}
+
+.slot {
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1px solid #0b1f24;
+  font-size: 0.9rem;
+}
+
+.slot.free {
+  background: var(--free);
+  color: #fff;
+}
+
+.slot.busy {
+  background: var(--busy);
+}
+
+.time {
+  font-size: 0.75rem;
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .side {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    overflow-x: auto;
+  }
+
+  .brand {
+    margin-bottom: 0;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  .menu {
+    display: flex;
+    flex: 1;
+    gap: 8px;
+    margin-top: 0;
+  }
+
+  .menu-link {
+    margin-bottom: 0;
+    white-space: nowrap;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .logout-form {
+    margin-top: 0;
+    flex-shrink: 0;
+  }
+
+  .logout-form button {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .main {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .toolbar {
+    gap: 8px;
+  }
+
+  .toolbar .toolbar-right {
+    margin-left: 0;
+    width: 100%;
+    text-align: left;
+  }
+}
+
+/* ===========================
+   Calendario semanal
+   =========================== */
+
+.weekgrid-wrapper {
+  margin-top: 8px;
+  overflow-x: auto;
+}
+
+.weekgrid {
+  display: grid;
+  grid-template-columns: 80px repeat(7, minmax(120px, 1fr));
+  border: 1px solid #10313a;
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 100%;
+}
+
+.wg-head,
+.wg-cell {
+  border-right: 1px solid #10313a;
+  border-bottom: 1px solid #10313a;
+  padding: 8px 10px;
+  min-height: 36px;
+}
+
+.wg-head {
+  background: #0e2a30;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.wg-head.time {
+  background: #0b2126;
+  color: #90a4ae;
+}
+
+.wg-time {
+  background: #0b2126;
+  color: #90a4ae;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 0.75rem;
+  padding: 6px 8px;
+}
+
+.wg-cell {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.wg-cell small {
+  opacity: 0.9;
+}
+
+/* estados de celda */
+.wg-cell.free {
+  background: #5f7682;
+  color: #ffffff;
+}
+
+.wg-cell.busy {
+  background: #0f2a30;
+}
+
+/* responsive mejoras */
+@media (max-width: 900px) {
+  .weekgrid {
+    grid-template-columns: 60px repeat(7, minmax(90px, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .weekgrid-wrapper {
+    margin-top: 4px;
+  }
+}
+
+/* ===========================
+   Resumen mensual
+   =========================== */
+
+.month-subtitle {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.month-subtitle span {
+  color: #71c6d1;
+  font-weight: 600;
+}
+
+/* Grid de cards */
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.month-card {
+  background: #0f242a;
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 150px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
+}
+
+.month-card__title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.month-card__body {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* items tipo lista */
+
+.month-list-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+}
+
+/* métricas grandes */
+
+.month-metric {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #71c6d1;
+  margin-bottom: 4px;
+}
+
+.month-muted {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* Responsive */
+
+@media (max-width: 1024px) {
+  .month-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .month-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===========================
+   Ingresos mensuales
+   =========================== */
+
+.income-subtitle {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.income-subtitle span {
+  color: #71c6d1;
+  font-weight: 600;
+}
+
+/* wrapper para scroll horizontal en móvil */
+.income-table-wrapper {
+  margin-top: 4px;
+  overflow-x: auto;
+}
+
+.income-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  background: #0b1d22;
+  min-width: 720px; /* para que en pantallas pequeñas permita scroll */
+}
+
+.income-table thead {
+  background: #0f2a30;
+}
+
+.income-table th,
+.income-table td {
+  padding: 10px 12px;
+  border: 1px solid #335059;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.income-table th {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.income-table tbody tr:nth-child(even):not(.total-row) {
+  background: #0f242a;
+}
+
+.income-table .num {
+  text-align: right;
+}
+
+.income-table .total-row {
+  background: #0b2126;
+  font-weight: 700;
+}
+
+.income-empty {
+  padding: 16px 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Responsive tweaks */
+
+@media (max-width: 900px) {
+  .income-table {
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .income-table {
+    min-width: 640px;
+  }
+}
+
+
+/* ===========================
+   Editar local (partner)
+   =========================== */
+
+.edit-subtitle {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-errors {
+  background: rgba(255, 100, 100, 0.08);
+  border: 1px solid rgba(255, 135, 135, 0.6);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+
+.edit-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+/* Tarjetas */
+
+.edit-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--btn-border);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6);
+}
+
+.edit-card__title {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.edit-card__subtitle {
+  margin: 10px 0 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.edit-card__hint {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Campos */
+
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-size: 0.88rem;
+}
+
+.edit-field label {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.edit-field input,
+.edit-field select,
+.edit-field textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--btn-border);
+  background-color: #103038;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.edit-field input:focus,
+.edit-field select:focus,
+.edit-field textarea:focus {
+  outline: 1px solid #9dd9e2;
+  border-color: #9dd9e2;
+}
+
+.edit-field--two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.field-error {
+  font-size: 0.78rem;
+  color: #ffb4b4;
+}
+
+/* Galería */
+
+.edit-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.edit-gallery img {
+  width: 130px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--btn-border);
+}
+
+.edit-empty {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Mapa */
+
+.edit-map {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Botón guardar */
+
+.edit-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.edit-submit {
+  background: #71c6d1;
+  color: #042b32;
+  border: none;
+  padding: 11px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.edit-submit:hover {
+  filter: brightness(1.05);
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .edit-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .edit-card {
+    padding: 14px 14px;
+  }
+
+  .edit-field--two {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-actions {
+    justify-content: stretch;
+  }
+
+  .edit-submit {
+    width: 100%;
+    text-align: center;
+  }
+}

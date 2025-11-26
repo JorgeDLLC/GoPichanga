@@ -3,98 +3,275 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <title>Crear usuario regular</title>
+    <title>Registro | GO PICHANGA</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
+      :root {
+        --bg-main: #02181f;
+        --card-bg: #06252f;
+        --input-bg: #0a303c;
+        --input-border: #dfe7eb;
+        --text-main: #ffffff;
+        --btn-bg: #e9edf2;
+        --btn-text: #243b53;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
-        font-family: system-ui, sans-serif;
-        margin: 24px;
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background-color: var(--bg-main);
+        color: var(--text-main);
       }
-      .card {
-        max-width: 520px;
-        margin: 0 auto;
-        padding: 20px;
-        border: 1px solid #ddd;
-        border-radius: 12px;
+
+      .auth-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
       }
-      .row {
-        margin-bottom: 12px;
-      }
-      label {
-        display: block;
-        margin-bottom: 6px;
-        font-weight: 600;
-      }
-      input,
-      select,
-      textarea {
+
+      .auth-card {
         width: 100%;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
+        max-width: 520px;
+        background-color: var(--card-bg);
+        border-radius: 24px;
+        padding: 32px 32px 26px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
       }
-      .btn {
-        padding: 10px 16px;
-        border: 0;
-        border-radius: 8px;
-        cursor: pointer;
+
+      .auth-title {
+        font-size: 1.7rem;
+        font-weight: 700;
+        margin: 0 0 22px;
       }
+
+      .auth-form {
+        margin-top: 8px;
+      }
+
+      .field-group {
+        margin-bottom: 14px;
+      }
+
+      .field-label {
+        display: block;
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+      }
+
+      /* aplica a todos los inputs del form generado por Django */
+      .auth-card input,
+      .auth-card select,
+      .auth-card textarea {
+        width: 100%;
+        padding: 11px 14px;
+        border-radius: 10px;
+        border: 1.5px solid var(--input-border);
+        background-color: var(--input-bg);
+        color: var(--text-main);
+        font-size: 0.95rem;
+        outline: none;
+      }
+
+      .auth-card input:focus,
+      .auth-card select:focus,
+      .auth-card textarea:focus {
+        border-color: #5ec4ff;
+        box-shadow: 0 0 0 1px rgba(94, 196, 255, 0.35);
+      }
+
+      .auth-card input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
       .btn-primary {
-        background: #0d6efd;
-        color: white;
+        margin-top: 10px;
+        width: 100%;
+        padding: 14px;
+        border-radius: 10px;
+        border: none;
+        background-color: var(--btn-bg);
+        color: var(--btn-text);
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: transform 0.08s ease, box-shadow 0.08s ease,
+          background-color 0.12s ease;
       }
-      .errors {
-        background: #ffe5e5;
-        color: #900;
-        padding: 10px;
+
+      .btn-primary:hover {
+        background-color: #f2f4f7;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+        transform: translateY(-1px);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+        box-shadow: none;
+      }
+
+      .auth-footer {
+        margin-top: 18px;
+        font-size: 0.75rem;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .auth-footer a {
+        color: #ffffff;
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .auth-footer a:hover {
+        text-decoration: underline;
+      }
+
+      .errors,
+      .field-errors {
+        background: rgba(255, 129, 129, 0.1);
+        color: #ffb4b4;
         border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 0.82rem;
+        margin: 6px 0 0;
+      }
+
+      .errors {
         margin-bottom: 12px;
+      }
+
+      @media (max-width: 480px) {
+        .auth-card {
+          padding: 24px 20px 22px;
+        }
+
+        .auth-title {
+          font-size: 1.5rem;
+        }
       }
     </style>
   </head>
+
   <body>
-    <div class="card">
-      <h1>Crear usuario regular</h1>
+    <div class="auth-wrapper">
+      <div class="auth-card">
+        <h1 class="auth-title">Registrate</h1>
 
-      {% if form.non_field_errors %}
-      <div class="errors">
-        {% for err in form.non_field_errors %}
-        <div>{{ err }}</div>
-        {% endfor %}
+        {% if form.non_field_errors %}
+        <div class="errors">
+          {% for err in form.non_field_errors %}
+          <div>{{ err }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate class="auth-form">
+          {% csrf_token %}
+
+          <div class="field-group">
+            <label class="field-label" for="{{ form.nombre.id_for_label }}"
+              >Nombre</label
+            >
+            {{ form.nombre }}
+            {% if form.nombre.errors %}
+            <div class="field-errors">
+              {% for err in form.nombre.errors %}
+              <div>{{ err }}</div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="{{ form.email.id_for_label }}"
+              >Correo</label
+            >
+            {{ form.email }}
+            {% if form.email.errors %}
+            <div class="field-errors">
+              {% for err in form.email.errors %}
+              <div>{{ err }}</div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="{{ form.password.id_for_label }}"
+              >Contraseña</label
+            >
+            {{ form.password }}
+            {% if form.password.errors %}
+            <div class="field-errors">
+              {% for err in form.password.errors %}
+              <div>{{ err }}</div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Si luego agregas un campo de confirmar contraseña en el form,
+               aquí puedes renderizarlo con el mismo estilo -->
+
+          <div class="field-group">
+            <label class="field-label" for="{{ form.telefono.id_for_label }}"
+              >Teléfono</label
+            >
+            {{ form.telefono }}
+            {% if form.telefono.errors %}
+            <div class="field-errors">
+              {% for err in form.telefono.errors %}
+              <div>{{ err }}</div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="field-group">
+            <label
+              class="field-label"
+              for="{{ form.fecha_nacimiento.id_for_label }}"
+              >Fecha de nacimiento</label
+            >
+            {{ form.fecha_nacimiento }}
+            {% if form.fecha_nacimiento.errors %}
+            <div class="field-errors">
+              {% for err in form.fecha_nacimiento.errors %}
+              <div>{{ err }}</div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="{{ form.direccion.id_for_label }}"
+              >Dirección</label
+            >
+            {{ form.direccion }}
+            {% if form.direccion.errors %}
+            <div class="field-errors">
+              {% for err in form.direccion.errors %}
+              <div>{{ err }}</div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <button class="btn-primary" type="submit">Ingresar</button>
+        </form>
+
+        <p class="auth-footer">
+          Ya tienes una cuenta?
+          <a href="{% url 'users:login' %}">Inicia sesión!!</a>
+        </p>
       </div>
-      {% endif %}
-
-      <form method="post" novalidate>
-        {% csrf_token %}
-        <div class="row">
-          <label for="{{ form.nombre.id_for_label }}">Nombre completo</label>
-          {{ form.nombre }} {{ form.nombre.errors }}
-        </div>
-        <div class="row">
-          <label for="{{ form.email.id_for_label }}">Correo</label>
-          {{ form.email }} {{ form.email.errors }}
-        </div>
-        <div class="row">
-          <label for="{{ form.password.id_for_label }}">Contraseña</label>
-          {{ form.password }} {{ form.password.errors }}
-        </div>
-        <div class="row">
-          <label for="{{ form.telefono.id_for_label }}">Teléfono</label>
-          {{ form.telefono }} {{ form.telefono.errors }}
-        </div>
-        <div class="row">
-          <label for="{{ form.fecha_nacimiento.id_for_label }}"
-            >Fecha de nacimiento</label
-          >
-          {{ form.fecha_nacimiento }} {{ form.fecha_nacimiento.errors }}
-        </div>
-        <div class="row">
-          <label for="{{ form.direccion.id_for_label }}">Dirección</label>
-          {{ form.direccion }} {{ form.direccion.errors }}
-        </div>
-
-        <button class="btn btn-primary" type="submit">Crear</button>
-      </form>
     </div>
   </body>
 </html>

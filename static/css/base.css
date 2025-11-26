@@ -1,0 +1,96 @@
+:root {
+  --bg-main: #02181f;
+  --topbar-bg: #031f26;
+  --text-main: #ffffff;
+  --nav-muted: rgba(255, 255, 255, 0.85);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* ===================== */
+/*      TOP BAR NAV      */
+/* ===================== */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 32px;
+  height: 72px;
+
+  background-color: var(--topbar-bg);
+}
+
+/* Izquierda: Logo */
+.topbar-left .brand {
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--text-main);
+}
+
+/* Centro: navegación */
+.topbar-center {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--nav-muted);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.nav-link:hover {
+  text-decoration: underline;
+}
+
+.nav-form {
+  display: flex;
+  align-items: center;
+}
+
+.nav-link--btn {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--nav-muted);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Derecha: filtros */
+.topbar-right {
+  display: flex;
+  align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .topbar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 16px;
+    row-gap: 10px;
+  }
+
+  .topbar-center {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 20px;
+  }
+}

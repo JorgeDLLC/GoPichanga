@@ -1,151 +1,331 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>GO Pichanga / {{ field.name }}</title>
-    <link rel="stylesheet" href="{% static 'booking/booking.css' %}" />
-  </head>
-  <body class="page">
-    <!-- Topbar -->
-    <header class="topbar">
-      <div class="brand">GO PICHANGA</div>
-      <nav class="topnav">
-        <a href="#">Conviértete en arrendatario</a>
-        <a href="">Mis reservas</a>
-      </nav>
-    </header>
 
-    <main class="container">
-      <h1 class="title">
-        {{ field.name }}
-        <span class="muted">/ {{ field.get_type_display }}</span>
-      </h1>
+{% block title %}GO Pichanga / {{ field.name }}{% endblock %}
 
-      <!-- Galería -->
-      <section class="gallery">
-        <figure class="gallery__main">
-          {% if field.primary_image %}
-          <img
-            src="{{ field.primary_image.image.url }}"
-            alt="Imagen principal de {{ field.name }}"
-          />
-          {% else %}
-          <div class="ph">IMAGEN PRINCIPAL</div>
-          {% endif %}
-        </figure>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'booking/booking.css' %}">
+{% endblock %}
 
-        <div class="gallery__thumbs">
-          {% if not album.is_primary %} {% for album in field.albums.all %}
-          <figure class="thumb">
+{% block navbar_filters %}
+{# en esta vista no usamos filtros, así que lo dejamos vacío #}
+{% endblock %}
+
+{% block content %}
+<main class="bk-container">
+  <h1 class="bk-title">
+    {{ field.name }}
+    <span class="bk-title__type">/ {{ field.get_type_display }}</span>
+  </h1>
+
+  <!-- GALERÍA -->
+  <section class="bk-gallery">
+    <figure class="bk-gallery__main">
+      {% if field.primary_image %}
+        <img
+          src="{{ field.primary_image.image.url }}"
+          alt="Imagen principal de {{ field.name }}"
+        />
+      {% else %}
+        <div class="bk-ph bk-ph--main">IMAGEN PRINCIPAL</div>
+      {% endif %}
+    </figure>
+
+    <div class="bk-gallery__thumbs">
+      {% if field.albums.exists %}
+        {% for album in field.albums.all %}
+          <figure class="bk-thumb">
             <img
               src="{{ album.image.url }}"
               alt="Imagen de {{ field.name }} {{ forloop.counter }}"
             />
           </figure>
-          {% endfor %} {% else %}
-          <!-- place-holders si no hay imágenes -->
-          <div class="thumb ph">IMAGEN</div>
-          <div class="thumb ph">IMAGEN</div>
-          <div class="thumb ph">IMAGEN</div>
-          <div class="thumb ph">IMAGEN</div>
-          {% endif %}
+        {% empty %}
+          <div class="bk-thumb bk-ph">IMAGEN</div>
+          <div class="bk-thumb bk-ph">IMAGEN</div>
+          <div class="bk-thumb bk-ph">IMAGEN</div>
+          <div class="bk-thumb bk-ph">IMAGEN</div>
+        {% endfor %}
+      {% else %}
+        <div class="bk-thumb bk-ph">IMAGENES</div>
+        <div class="bk-thumb bk-ph">IMAGENES</div>
+        <div class="bk-thumb bk-ph">IMAGENES</div>
+        <div class="bk-thumb bk-ph">IMAGENES</div>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- INFO + PANEL DE RESERVA -->
+  <section class="bk-two-cols">
+    <!-- Columna izquierda -->
+    <article class="bk-info">
+      <h2 class="bk-subtitle">
+        Cancha en :
+        <span class="bk-subtitle__addr">({{ field.address }})</span>
+      </h2>
+
+      <div class="bk-desc">
+        <h3 class="bk-desc__title">DESCRIPCIÓN DEL LOCAL</h3>
+        <p class="bk-desc__text">
+          {{ field.description|default:"Sin descripción disponible." }}
+        </p>
+      </div>
+
+      <ul class="bk-chips">
+        <li class="bk-chip">
+          <span class="bk-chip__label">Tipo</span>
+          <span class="bk-chip__value">{{ field.get_type_display }}</span>
+        </li>
+        <li class="bk-chip">
+          <span class="bk-chip__label">Luces</span>
+          <span class="bk-chip__value">
+            {{ field.has_lights|yesno:"Sí,No" }}
+          </span>
+        </li>
+        <li class="bk-chip">
+          <span class="bk-chip__label">Precio/Hora</span>
+          <span class="bk-chip__value">
+            S/ {{ field.price_hour|floatformat:2 }}
+          </span>
+        </li>
+      </ul>
+    </article>
+
+    <!-- Columna derecha: RESERVA -->
+    <aside class="bk-booking">
+      <header class="bk-booking__header">
+        <div class="bk-price">
+          <span class="bk-price__currency">S/</span>
+          <span class="bk-price__value">
+            {{ field.price_hour|floatformat:2 }}
+          </span>
         </div>
-      </section>
+        <div class="bk-price__note">PRECIO POR HORA</div>
+      </header>
 
-      <!-- Info izquierda + Panel derecha -->
-      <section class="details-grid">
-        <!-- Columna izquierda -->
-        <article class="info">
-          <h2 class="subtitle">
-            Cancha en : <span class="muted">({{ field.address }})</span>
-          </h2>
+      {% if messages %}
+        <ul class="bk-messages">
+          {% for m in messages %}
+            <li class="bk-messages__item {{ m.tags }}">{{ m }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
 
-          <div class="desc">
-            <h3 class="desc__title">DESCRIPCIÓN DEL LOCAL</h3>
-            <p class="desc__text">
-              {{ field.description|default:"Sin descripción disponible." }}
-            </p>
+      <form
+        method="post"
+        action="{% url 'payments:checkout' field.id %}"
+        class="bk-form"
+      >
+        {% csrf_token %}
 
-            <ul class="chips">
-              <li class="chip">
-                <span class="chip__label">Tipo</span>
-                <span class="chip__value">{{ field.get_type_display }}</span>
-              </li>
-              <li class="chip">
-                <span class="chip__label">Luces</span>
-                <span class="chip__value"
-                  >{{ field.has_lights|yesno:"Sí,No" }}</span
-                >
-              </li>
-              <li class="chip">
-                <span class="chip__label">Precio/Hora</span>
-                <span class="chip__value"
-                  >S/ {{ field.price_hour|floatformat:2 }}</span
-                >
-              </li>
-            </ul>
-        </article>
-        <!-- Columna derecha -->
-        <aside class="booking">
-          <header class="booking__header">
-            <div class="price">
-              <span class="price__currency">S/</span>
-              <span class="price__value">{{ field.price_hour|floatformat:2 }}</span>
+        <div class="bk-form__row">
+          <label for="id_date">Fecha</label>
+          <input
+            id="id_date"
+            type="date"
+            name="date"
+            class="bk-date-input"
+            required
+          />
+        </div>
+
+        <div class="bk-form__row bk-form__row--two">
+          <div>
+            <label for="id_start_time">Hora inicio</label>
+            <input
+              id="id_start_time"
+              type="time"
+              name="start_time"
+              class="bk-time-input"
+              required
+            />
+          </div>
+          <div>
+            <label for="id_end_time">Hora fin</label>
+            <input
+              id="id_end_time"
+              type="time"
+              name="end_time"
+              class="bk-time-input"
+              required
+            />
+          </div>
+        </div>
+
+        <p class="bk-hint">
+          Formato 24 horas (ej: 18:00, 18:30). El sistema ajusta automáticamente a
+          horas exactas o medias horas.
+        </p>
+
+        {% if field.field_equipments.all %}
+          <div class="bk-equip">
+            <h4 class="bk-equip__title">Equipamiento adicional</h4>
+            <div class="bk-equip__list">
+              {% for fe in field.field_equipments.all %}
+                <div class="bk-equip__item">
+                  <div class="bk-equip__info">
+                    <span class="bk-equip__name">
+                      {{ fe.equipment.get_type_display }}
+                    </span>
+                    <span class="bk-equip__meta">
+                      Stock: {{ fe.stock }} · S/ {{ fe.price_per_unit }} c/u
+                    </span>
+                  </div>
+                  <div class="bk-equip__qty">
+                    <label for="id_q{{ fe.id }}">Cantidad</label>
+                    <input
+                      id="id_q{{ fe.id }}"
+                      type="number"
+                      name="quantity_{{ fe.id }}"
+                      min="0"
+                      max="{{ fe.stock }}"
+                      value="0"
+                    />
+                  </div>
+                </div>
+              {% endfor %}
             </div>
-            <div class="price__note">PRECIO POR HORA</div>
-          </header>
+          </div>
+        {% endif %}
 
-          {% if messages %}
-            <ul>
-              {% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}
-            </ul>
-          {% endif %}
+        <button type="submit" class="bk-btn">
+          Reservar
+        </button>
+      </form>
+    </aside>
+  </section>
 
-          <form method="post" action="{% url 'payments:checkout' field.id %}">
-            {% csrf_token %}
-            <!-- iguales inputs que arriba -->
-            <input type="date" name="date" required>
-            <input type="time" name="start_time" required>
-            <input type="time" name="end_time" required>
+  <!-- MAPA -->
+  <section class="bk-map">
+    <h2 class="bk-map__title">GOOGLE MAPS CON LA UBICACIÓN</h2>
 
-            {% for fe in field.field_equipments.all %}
-              <label>
-                {{ fe.equipment.get_type_display }} (stock {{ fe.stock }}) — S/ {{ fe.price_per_unit }}
-                <input type="number" name="quantity_{{ fe.id }}" min="0" max = "{{ fe.stock }}" value="0">
-              </label>
-            {% endfor %}
+    <div class="bk-map__frame">
+      <iframe
+        title="Mapa de {{ field.name }}"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps?q={{ field.address|urlencode }}&output=embed"
+      ></iframe>
+    </div>
 
-            <button type="submit">Continuar al pago</button>
-          </form>
+    <div class="bk-map__link">
+      <a
+        target="_blank"
+        rel="noopener"
+        href="https://www.google.com/maps/search/?api=1&query={{ field.address|urlencode }}"
+      >
+        Abrir en Google Maps
+      </a>
+    </div>
+  </section>
+</main>
+<script>
+  // Ajuste de cualquier hora a :00 o :30
+  function snapToHalfHour(input) {
+    if (!input.value) return;
 
-        </aside>
+    const parts = input.value.split(":");
+    if (parts.length < 2) return;
 
-      </section>
+    let h = parseInt(parts[0], 10);
+    let m = parseInt(parts[1], 10);
 
-      <!-- Mapa -->
-      <section class="map">
-        <h2 class="subtitle">Ubicación</h2>
-        <div class="map__frame">
-          <iframe
-            title="Mapa de {{ field.name }}"
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            src="https://www.google.com/maps?q={{ field.address|urlencode }}&output=embed"
-          >
-          </iframe>
-        </div>
-        <div class="map__link">
-          <a
-            target="_blank"
-            rel="noopener"
-            href="https://www.google.com/maps/search/?api=1&query={{ field.address|urlencode }}"
-          >
-            Abrir en Google Maps
-          </a>
-        </div>
-      </section>
-    </main>
-  </body>
-</html>
+    if (isNaN(h) || isNaN(m)) return;
+
+    // 00–14 -> :00 | 15–44 -> :30 | 45–59 -> siguiente hora :00
+    if (m < 15) {
+      m = 0;
+    } else if (m < 45) {
+      m = 30;
+    } else {
+      m = 0;
+      h = (h + 1) % 24;
+    }
+
+    const hh = String(h).padStart(2, "0");
+    const mm = String(m).padStart(2, "0");
+    input.value = `${hh}:${mm}`;
+  }
+
+  // Redondear un Date a la próxima media hora
+  function nextHalfHour(date) {
+    const d = new Date(date.getTime());
+    d.setSeconds(0, 0);
+
+    const minutes = d.getMinutes();
+    if (minutes === 0 || minutes === 30) {
+      return d;
+    } else if (minutes < 30) {
+      d.setMinutes(30);
+    } else {
+      d.setMinutes(0);
+      d.setHours(d.getHours() + 1);
+    }
+    return d;
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const dateInput = document.getElementById("id_date");
+    const timeInputs = document.querySelectorAll(".bk-time-input");
+
+    // --- 1) bloquear fechas pasadas ---
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+
+    if (dateInput) {
+      dateInput.min = todayStr;
+      // Por UX, podemos setear hoy por defecto
+      if (!dateInput.value) {
+        dateInput.value = todayStr;
+      }
+    }
+
+    // --- 2) limitar horas cuando la fecha es hoy ---
+    function updateTimeMin() {
+      if (!dateInput) return;
+
+      const selectedDate = dateInput.value;
+      // limpiamos restricciones por defecto
+      timeInputs.forEach((inp) => (inp.min = ""));
+
+      if (!selectedDate) return;
+
+      if (selectedDate === todayStr) {
+        const rounded = nextHalfHour(new Date());
+        const hh = String(rounded.getHours()).padStart(2, "0");
+        const mi = String(rounded.getMinutes()).padStart(2, "0");
+        const minTime = `${hh}:${mi}`;
+        timeInputs.forEach((inp) => {
+          inp.min = minTime;
+          // si el usuario tenía algo menor a min, lo subimos a min
+          if (inp.value && inp.value < minTime) {
+            inp.value = minTime;
+          }
+        });
+      }
+    }
+
+    if (dateInput) {
+      dateInput.addEventListener("change", updateTimeMin);
+    }
+    updateTimeMin(); // correr al cargar
+
+    // --- 3) enganchar el ajuste a media hora en las horas ---
+    timeInputs.forEach(function (input) {
+      input.addEventListener("change", function () {
+        snapToHalfHour(input);
+        updateTimeMin(); // volver a validar contra min
+      });
+      input.addEventListener("blur", function () {
+        snapToHalfHour(input);
+        updateTimeMin();
+      });
+    });
+  });
+</script>
+
+
+{% endblock %}

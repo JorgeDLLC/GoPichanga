@@ -1,0 +1,211 @@
+/* ================
+   LAYOUT GENERAL
+   ================ */
+
+.wrap {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 24px 40px;
+}
+
+/* GRID de canchas: 4 por fila en desktop */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 4 columnas */
+  gap: 32px;
+}
+
+/* Mensaje vacío */
+.empty {
+  max-width: 600px;
+  margin: 60px auto;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+}
+
+/* ===========================
+   CARD de cancha (cada local)
+   =========================== */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background-color: #06252f;
+  border-radius: 24px;
+  text-decoration: none;
+  color: #ffffff;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+}
+
+/* parte superior: imagen / placeholder */
+.thumb {
+  padding: 20px 20px 0;
+}
+
+.thumb img,
+.thumb .noimg {
+  width: 100%;
+  border-radius: 18px;
+  background-color: #d9d9d9;
+  display: block;
+  aspect-ratio: 4 / 3; /* casi cuadrado, como el mock */
+  object-fit: cover;
+}
+
+/* parte inferior: texto */
+.meta {
+  padding: 16px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.name {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* fila de precio + badge */
+.bottom {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+.price {
+  font-weight: 700;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  background-color: #073845;
+  color: #c9f2ff;
+}
+
+/* ===========================
+   FILTRO (iconito embudo)
+   =========================== */
+
+.filter-dd {
+  position: relative;
+}
+
+.filter-dd[open] > summary::marker {
+  content: "";
+}
+
+.iconbtn {
+  border-radius: 999px;
+  border: 1px solid rgba(157, 217, 226, 0.9);
+  background-color: transparent;
+  padding: 6px 8px;
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconbtn::-webkit-details-marker {
+  display: none;
+}
+
+/* dropdown del filtro */
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 110%;
+  margin-top: 8px;
+  min-width: 220px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background-color: #06252f;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.7);
+  z-index: 20;
+}
+
+.dropdown label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #dfe7eb;
+  background-color: #0a303c;
+  color: #ffffff;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  background-color: #e9edf2;
+  color: #243b53;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.link-clear {
+  margin-left: 8px;
+  font-size: 0.8rem;
+  color: #9dd9e2;
+  text-decoration: none;
+}
+
+.link-clear:hover {
+  text-decoration: underline;
+}
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+
+@media (max-width: 1200px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .wrap {
+    padding: 24px 16px 32px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}

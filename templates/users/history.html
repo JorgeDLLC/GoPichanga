@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}GO PICHANGA · Historial de reservas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/history.css' %}">
+{% endblock %}
+
+{% block navbar_filters %}{% endblock %}
+
+{% block content %}
+<main class="hist-container">
+  <h1 class="hist-title">Mis reservas</h1>
+
+  {% if bookings %}
+    <section class="hist-list">
+      {% for b in bookings %}
+        <article class="hist-card">
+          <div class="hist-info">
+            <div class="hist-thumb">
+              {% if b.field.primary_image %}
+                <img
+                  src="{{ b.field.primary_image.image.url }}"
+                  alt="Imagen de {{ b.field.name }}"
+                >
+              {% else %}
+                <img
+                  src="{% static 'images/no-image.png' %}"
+                  alt="Sin imagen"
+                >
+              {% endif %}
+            </div>
+
+            <div class="hist-details">
+              <h2 class="hist-field-name">{{ b.field.name }}</h2>
+              <p class="hist-meta">
+                <span class="label">Inicio:</span>
+                {{ b.start|date:"d/m/Y H:i" }}
+              </p>
+              <p class="hist-meta">
+                <span class="label">Fin:</span>
+                {{ b.end|date:"d/m/Y H:i" }}
+              </p>
+            </div>
+          </div>
+
+          <div class="hist-actions">
+            <form action="{% url 'booking:edit' b.id %}" method="get">
+              <button class="btn btn-edit" type="submit">Editar</button>
+            </form>
+            <form action="{% url 'booking:delete' b.id %}" method="post">
+              {% csrf_token %}
+              <button class="btn btn-delete" type="submit">Eliminar</button>
+            </form>
+          </div>
+        </article>
+      {% endfor %}
+    </section>
+  {% else %}
+    <p class="hist-empty">No tienes reservas registradas.</p>
+  {% endif %}
+</main>
+{% endblock %}

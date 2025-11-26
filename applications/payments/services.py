@@ -1,66 +1,72 @@
 # applications/payments/services.py
 from decimal import Decimal
 from django.db import transaction
-from applications.payments.models import Payment, PaymentStatus
 from applications.booking.models import Booking, BookingExtra, BookingStatus
-from applications.booking.services import field_is_free, equipment_available_qty
 
-def compute_total(field_price_hour: Decimal, start, end, extras: list[dict]) -> Decimal:
-    hours = Decimal((end - start).total_seconds()) / Decimal(3600)
-    base = (field_price_hour or Decimal('0')) * hours
-    extras_total = sum(Decimal(e['quantity']) * Decimal(e['unit_price']) for e in extras)
+
+def compute_total(price_hour, start, end, extras):
+    """Calcula total = horas * precio + extras."""
+    duration_hours = (end - start).total_seconds() / 3600
+    if duration_hours <= 0:
+        raise ValueError("La hora de fin debe ser posterior a la hora de inicio.")
+
+    base = Decimal(price_hour) * Decimal(duration_hours)
+
+    extras_total = sum(
+        Decimal(e["quantity"]) * Decimal(e["unit_price"]) for e in extras
+    )
+
     return base + extras_total
+
 
 @transaction.atomic
 def confirm_payment_and_create_booking(*, user, field, start, end, extras, form):
-    """
-    - Revalida disponibilidad del campo y de los extras
-    - Crea Booking + BookingExtra
-    - Crea Payment simulado aprobado
-    - Devuelve (booking, payment)
-    """
-    from applications.field.models import FieldEquipment  # import local para evitar ciclos
+    """Crea la reserva + extras (pago simulado)."""
 
-    if not field_is_free(field, start, end):
-        raise ValueError("El campo ya está reservado en ese horario.")
+    print(">> confirm_payment_and_create_booking")  # DEBUG
+    print("   user:", user.id, "field:", field.id)
+    print("   start/end:", start, end)
+    print("   extras len:", len(extras))
+    overlap = Booking.objects.filter(
+        field=field,
+        status__in=[BookingStatus.PENDING, BookingStatus.CONFIRMED],
+        start__lt=end,
+        end__gt=start,
+    ).exists()
+    print("   overlap?", overlap)  # DEBUG
+    if overlap:
+        raise ValueError("La cancha ya tiene una reserva en ese horario.")
 
-    # validar stock
-    for e in extras:
-        fe: FieldEquipment = e['fe']
-        qty: int = e['quantity']
-        disp = equipment_available_qty(fe, start, end)
-        if qty > disp:
-            raise ValueError(f"Stock insuficiente de {fe.equipment.get_type_display()} (disp {disp}).")
-
-    # total
+    # 2) Total
     total = compute_total(field.price_hour, start, end, [
-        {'quantity': e['quantity'], 'unit_price': e['unit_price']} for e in extras
+        {"quantity": e["quantity"], "unit_price": e["unit_price"]} for e in extras
     ])
-
-    # crear booking
+    print("   computed total:", total)  # DEBUG
+    # 3) Booking
     booking = Booking.objects.create(
-        user=user, field=field, start=start, end=end,
-        status=BookingStatus.CONFIRMED, total_amount=total
+        user=user,
+        field=field,
+        start=start,
+        end=end,
+        status=BookingStatus.CONFIRMED,
+        total_amount=total,
     )
-
-    # extras
+    print("   booking saved id:", booking.id)  # DEBUG
+    
+    # 4) Extras
     for e in extras:
         BookingExtra.objects.create(
             booking=booking,
-            field_equipment=e['fe'],
-            quantity=e['quantity'],
-            unit_price=e['unit_price']
+            field_equipment=e["fe"],
+            quantity=e["quantity"],
+            unit_price=e["unit_price"],
         )
-
-    # payment simulado
-    payment = Payment.objects.create(
-        booking=booking,
-        status=PaymentStatus.APPROVED,
-        amount=total,
-        holder_name=form.cleaned_data['holder_name'],
-        card_brand=form.card_brand(),
-        last4=form.card_last4(),
-        auth_code='AP-' + str(booking.id).zfill(6),
-    )
-
-    return booking, payment, total
+    print("   extras saved")  # DEBUG
+    # 5) Pago simulado
+    payment = None
+    payment_info = {
+        "brand": form.card_brand(),
+        "last4": form.card_last4(),
+        "amount": total,
+    }
+    return booking, payment, payment_info

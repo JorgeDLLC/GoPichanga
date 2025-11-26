@@ -1,158 +1,85 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <title>Pagar reserva · {{ field.name }}</title>
-    <link rel="stylesheet" href="{% static 'booking/booking.css' %}" />
-    <style>
-      body {
-        font-family: system-ui;
-        margin: 20px;
-        color: #0f2a30;
-      }
-      .wrap {
-        max-width: 900px;
-        margin: auto;
-        display: grid;
-        grid-template-columns: 1.3fr 1fr;
-        gap: 24px;
-      }
-      .card {
-        border: 1px solid #e5e8eb;
-        border-radius: 12px;
-        padding: 16px;
-        background: #fff;
-      }
-      .title {
-        margin: 0 0 6px;
-      }
-      .muted {
-        color: #6b7b85;
-      }
-      .total {
-        font-size: 22px;
-        font-weight: 800;
-        margin-top: 8px;
-      }
-      .btn {
-        background: #0f6;
-        color: #063;
-        font-weight: 800;
-        border: none;
-        padding: 10px 14px;
-        border-radius: 10px;
-        cursor: pointer;
-      }
-      .grid2 {
-        display: grid;
-        gap: 10px;
-        grid-template-columns: 1fr 1fr;
-      }
-      label {
-        font-size: 13px;
-        color: #344;
-      }
-      input,
-      select {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #cdd5da;
-        border-radius: 10px;
-      }
-      ul {
-        margin: 0 0 8px 16px;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Confirmar pago</h1>
 
-    {% if messages %}
-    <ul>
-      {% for m in messages %}
-      <li class="{{ m.tags }}">{{ m }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %}
+{% block title %}Pago · {{ field.name }}{% endblock %}
 
-    <div class="wrap">
-      <!-- Resumen -->
-      <section class="card">
-        <h3 class="title">Resumen</h3>
-        <div>
-          <b>Cancha:</b> {{ field.name }} ({{ field.get_type_display }})
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'payments/payments.css' %}">
+{% endblock %}
+
+{% block navbar_filters %}{% endblock %}
+
+{% block content %}
+<main class="pay-container">
+  <section class="pay-header">
+    <h1 class="pay-title">Simulación de pago</h1>
+    <p class="pay-subtitle">
+      Estás por reservar <strong>{{ field.name }}</strong>.
+    </p>
+  </section>
+
+  <section class="pay-grid">
+    <!-- Resumen izquierda -->
+    <article class="pay-summary">
+      <h2 class="pay-summary__title">Resumen de la reserva</h2>
+
+      <div class="pay-summary__box">
+        <p><span class="label">Fecha:</span> {{ start|date:"d/m/Y" }}</p>
+        <p><span class="label">Horario:</span> {{ start|date:"H:i" }} – {{ end|date:"H:i" }}</p>
+        <p><span class="label">Cancha:</span> {{ field.name }}</p>
+        <p><span class="label">Tipo:</span> {{ field.get_type_display }}</p>
+      </div>
+
+      <div class="pay-total">
+        <span class="pay-total__label">Total a pagar</span>
+        <div class="pay-total__amount">
+          <span class="currency">S/</span>
+          <span class="value">{{ total|floatformat:2 }}</span>
         </div>
-        <div>
-          <b>Horario:</b> {{ start|date:"Y-m-d H:i" }} → {{ end|date:"H:i" }}
+      </div>
+    </article>
+
+    <!-- Formulario derecha -->
+    <article class="pay-panel">
+      <h2 class="pay-panel__title">Datos de pago</h2>
+      <p class="pay-panel__hint">
+        Esta es una pasarela simulada. Ingresa los datos requeridos para completar la reserva.
+      </p>
+
+      <form method="post" class="pay-form">
+        {% csrf_token %}
+
+        {# === Hidden para conservar fecha y horas entre GET y POST === #}
+        <input type="hidden" name="date" value="{{ start|date:'Y-m-d' }}">
+        <input type="hidden" name="start_time" value="{{ start|date:'H:i' }}">
+        <input type="hidden" name="end_time" value="{{ end|date:'H:i' }}">
+
+        {# === Hidden para conservar extras seleccionados === #}
+        {% for e in extras %}
+          <input type="hidden" name="quantity_{{ e.fe.id }}" value="{{ e.quantity }}">
+        {% endfor %}
+
+        {# Renderizamos el form de Django, pero con estilos de tarjeta #}
+        <div class="pay-form__fields">
+          {% for field in form %}
+            <div class="pay-field">
+              {{ field.label_tag }}
+              {{ field }}
+              {% if field.help_text %}
+                <small class="help">{{ field.help_text }}</small>
+              {% endif %}
+              {% for error in field.errors %}
+                <div class="error">{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endfor %}
         </div>
-        <div><b>Extras:</b></div>
-        {% if extras %}
-        <ul>
-          {% for e in extras %}
-          <li>
-            {{ e.fe.equipment.get_type_display }} × {{ e.quantity }} — S/ {{
-            e.unit_price }}
-          </li>
-          {% endfor %}
-        </ul>
-        {% else %}
-        <div class="muted">Sin extras</div>
-        {% endif %}
-        <div class="total">Total: S/ {{ total }}</div>
-      </section>
 
-      <!-- Formulario de pago simulado -->
-      <section class="card">
-        <h3 class="title">Datos de pago (simulado)</h3>
-        <form method="post">
-          {% csrf_token %}
-          <div>
-            <label>Titular</label>
-            {{ form.holder_name }}
-          </div>
-          <div>
-            <label>Número de tarjeta</label>
-            {{ form.card_number }}
-          </div>
-          <div class="grid2">
-            <div>
-              <label>Mes</label>
-              {{ form.exp_month }}
-            </div>
-            <div>
-              <label>Año</label>
-              {{ form.exp_year }}
-            </div>
-          </div>
-          <div style="margin-top: 10px">
-            <label>CVV</label>
-            {{ form.cvv }}
-          </div>
-
-          <!-- ⬇️ Reenviamos datos de la reserva (horario y extras) -->
-          <input type="hidden" name="date" value="{{ start|date:'Y-m-d' }}" />
-          <input
-            type="hidden"
-            name="start_time"
-            value="{{ start|date:'H:i' }}"
-          />
-          <input type="hidden" name="end_time" value="{{ end|date:'H:i' }}" />
-          {% for e in extras %}
-          <input
-            type="hidden"
-            name="quantity_{{ e.fe.id }}"
-            value="{{ e.quantity }}"
-          />
-          {% endfor %}
-
-          <div style="margin-top: 14px">
-            <button class="btn" type="submit">
-              Realizar pago y crear reserva
-            </button>
-          </div>
-        </form>
-      </section>
-    </div>
-  </body>
-</html>
+        <button type="submit" class="pay-btn">
+          Pagar y crear reserva
+        </button>
+      </form>
+    </article>
+  </section>
+</main>
+{% endblock %}

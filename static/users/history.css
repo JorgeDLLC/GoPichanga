@@ -1,0 +1,183 @@
+:root {
+  --hist-bg: #02181f;
+  --hist-card: #0f242a;
+  --hist-text: #e8f0f2;
+  --hist-muted: #90a4ae;
+  --hist-accent: #71c6d1;
+  --hist-danger: #b84242;
+  --hist-border: #1f3a40;
+}
+
+.hist-container {
+  max-width: 1100px;
+  margin: 24px auto 40px;
+  padding: 0 24px;
+  color: var(--hist-text);
+}
+
+.hist-title {
+  margin: 0 0 20px;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+/* Lista de tarjetas */
+
+.hist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Tarjeta individual */
+
+.hist-card {
+  background: var(--hist-card);
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 14px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+}
+
+.hist-info {
+  display: flex;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Miniatura */
+
+.hist-thumb {
+  width: 220px;
+  max-width: 40vw;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #d3d8dd1a;
+  flex-shrink: 0;
+}
+
+.hist-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Detalles */
+
+.hist-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.hist-field-name {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--hist-accent);
+  font-weight: 700;
+}
+
+.hist-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--hist-muted);
+}
+
+.hist-meta .label {
+  font-weight: 600;
+  color: var(--hist-text);
+  margin-right: 4px;
+}
+
+/* Acciones */
+
+.hist-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.hist-actions .btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-edit {
+  background: var(--hist-accent);
+  color: #0b1d22;
+}
+
+.btn-delete {
+  background: var(--hist-danger);
+  color: #ffffff;
+}
+
+.btn-edit:hover,
+.btn-delete:hover {
+  filter: brightness(1.05);
+}
+
+/* Estado vacío */
+
+.hist-empty {
+  margin-top: 24px;
+  font-size: 0.9rem;
+  color: var(--hist-muted);
+}
+
+/* ===========================
+   Responsive
+   =========================== */
+
+@media (max-width: 900px) {
+  .hist-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hist-info {
+    flex-direction: column;
+  }
+
+  .hist-thumb {
+    width: 100%;
+    height: 160px;
+  }
+
+  .hist-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 600px) {
+  .hist-container {
+    padding: 0 16px 32px;
+  }
+
+  .hist-card {
+    padding: 12px 12px;
+  }
+
+  .hist-actions {
+    justify-content: space-between;
+  }
+
+  .hist-actions .btn {
+    width: 48%;
+    text-align: center;
+  }
+}

@@ -1,0 +1,122 @@
+{% extends "base_partner.html" %}
+
+{% block title %}Editar local · {{ field.name }}{% endblock %}
+
+{% block menu_edit_field_active %}active{% endblock %}
+
+{% block header %}
+  <h1>Editar local</h1>
+  <p class="edit-subtitle">
+    Modifica los detalles de tu cancha. Los cambios se aplican a las próximas reservas.
+  </p>
+{% endblock %}
+
+{% block content %}
+  <form method="post" enctype="multipart/form-data" class="edit-form">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="form-errors">
+        {% for e in form.non_field_errors %}
+          <div>{{ e }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="edit-grid">
+      <!-- Columna izquierda: datos del local -->
+      <section class="edit-card">
+        <h2 class="edit-card__title">Información del local</h2>
+
+        <div class="edit-field">
+          {{ form.name.label_tag }}
+          {{ form.name }}
+          {% for error in form.name.errors %}
+            <div class="field-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="edit-field">
+          {{ form.type.label_tag }}
+          {{ form.type }}
+          {% for error in form.type.errors %}
+            <div class="field-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="edit-field">
+          {{ form.address.label_tag }}
+          {{ form.address }}
+          {% for error in form.address.errors %}
+            <div class="field-error">{{ error }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="edit-field edit-field--two">
+          <div>
+            {{ form.price_hour.label_tag }}
+            {{ form.price_hour }}
+            {% for error in form.price_hour.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div>
+            {{ form.has_lights.label_tag }}
+            {{ form.has_lights }}
+            {% for error in form.has_lights.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <!-- Columna derecha: mapa + fotos -->
+      <section class="edit-right">
+        <div class="edit-card">
+          <h2 class="edit-card__title">Ubicación</h2>
+          <p class="edit-card__hint">
+            Verifica que la dirección sea correcta. El mapa se genera usando la dirección actual.
+          </p>
+          <div class="edit-map">
+            <iframe
+              title="Mapa de {{ field.name }}"
+              width="100%"
+              height="260"
+              style="border-radius:12px;border:none;"
+              src="https://www.google.com/maps?q={{ field.address|urlencode }}&output=embed">
+            </iframe>
+          </div>
+        </div>
+
+        <div class="edit-card">
+          <h2 class="edit-card__title">Fotos del local</h2>
+
+          <div class="edit-gallery">
+            {% for img in albums %}
+              <img src="{{ img.image.url }}" alt="Foto de {{ field.name }}">
+            {% empty %}
+              <p class="edit-empty">No hay fotos aún.</p>
+            {% endfor %}
+          </div>
+
+          <h3 class="edit-card__subtitle">Agregar nuevas fotos</h3>
+          <div class="edit-field">
+            {{ album_form.images.label_tag }}
+            {{ album_form.images }}
+            {% for error in album_form.images.errors %}
+              <div class="field-error">{{ error }}</div>
+            {% endfor %}
+          </div>
+          <p class="edit-card__hint">
+            Puedes seleccionar varias imágenes a la vez. Los formatos recomendados son JPG y PNG.
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <div class="edit-actions">
+      <button class="edit-submit" type="submit">Guardar cambios</button>
+    </div>
+  </form>
+{% endblock %}

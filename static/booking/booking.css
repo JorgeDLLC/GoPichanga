@@ -1,0 +1,393 @@
+/* ===== Layout general ===== */
+
+.bk-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+  color: #ffffff;
+}
+
+.bk-title {
+  margin: 0 0 24px;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.bk-title__type {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ===== Galería ===== */
+
+.bk-gallery {
+  display: grid;
+  grid-template-columns: 3fr 1.3fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.bk-gallery__main,
+.bk-gallery__main img {
+  width: 100%;
+  height: 100%;
+}
+
+.bk-gallery__main img {
+  display: block;
+  border-radius: 20px;
+  object-fit: cover;
+  background-color: #d9d9d9;
+}
+
+.bk-ph {
+  background-color: #d9d9d9;
+  border-radius: 20px;
+  color: #222;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.bk-ph--main {
+  min-height: 260px;
+}
+
+.bk-gallery__thumbs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.bk-thumb,
+.bk-thumb img {
+  width: 100%;
+  height: 100%;
+}
+
+.bk-thumb img {
+  display: block;
+  border-radius: 18px;
+  object-fit: cover;
+  background-color: #d9d9d9;
+}
+
+/* ===== Info + Booking (dos columnas) ===== */
+
+.bk-two-cols {
+  display: grid;
+  grid-template-columns: 2fr 1.3fr;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+/* Info izquierda */
+
+.bk-info {}
+
+.bk-subtitle {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.bk-subtitle__addr {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.bk-desc {
+  margin-top: 12px;
+}
+
+.bk-desc__title {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+}
+
+.bk-desc__text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Chips */
+
+.bk-chips {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.bk-chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background-color: #073845;
+  font-size: 0.8rem;
+}
+
+.bk-chip__label {
+  font-weight: 500;
+  margin-right: 4px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.bk-chip__value {
+  font-weight: 600;
+}
+
+/* ===== Panel de reserva ===== */
+
+.bk-booking {
+  background-color: #06252f;
+  border-radius: 20px;
+  padding: 20px 22px 22px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.7);
+}
+
+.bk-booking__header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.bk-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.bk-price__currency {
+  font-weight: 600;
+}
+
+.bk-price__value {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.bk-price__note {
+  font-size: 0.85rem;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Mensajes */
+
+.bk-messages {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  font-size: 0.8rem;
+}
+
+.bk-messages__item {
+  margin-bottom: 4px;
+  color: #ffb4b4;
+}
+
+/* Formulario */
+
+.bk-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bk-form__row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.bk-form__row--two {
+  flex-direction: row;
+  gap: 10px;
+}
+
+.bk-form__row--two > div {
+  flex: 1;
+}
+
+.bk-form label {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.bk-form input[type="date"],
+.bk-form input[type="time"],
+.bk-form input[type="number"] {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #dfe7eb;
+  background-color: #0a303c;
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+/* Equipos */
+
+.bk-equip {
+  margin-top: 8px;
+}
+
+.bk-equip__title {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+}
+
+.bk-equip__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bk-equip__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.bk-equip__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.bk-equip__name {
+  font-weight: 600;
+}
+
+.bk-equip__meta {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.bk-equip__qty label {
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* Botón */
+
+.bk-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background-color: #e9edf2;
+  color: #243b53;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.bk-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+}
+
+.bk-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* ===== Mapa ===== */
+
+.bk-map {
+  margin-top: 32px;
+}
+
+.bk-map__title {
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.bk-map__frame {
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background-color: #d9d9d9;
+  height: 320px;
+}
+
+.bk-map__frame iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.bk-map__link {
+  text-align: center;
+  margin-top: 8px;
+}
+
+.bk-map__link a {
+  font-size: 0.9rem;
+  color: #9dd9e2;
+  text-decoration: none;
+}
+
+.bk-map__link a:hover {
+  text-decoration: underline;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 1024px) {
+  .bk-gallery {
+    grid-template-columns: 1.8fr 1.2fr;
+  }
+
+  .bk-two-cols {
+    grid-template-columns: 1.7fr 1.3fr;
+  }
+}
+
+@media (max-width: 820px) {
+  .bk-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .bk-gallery__thumbs {
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  .bk-two-cols {
+    grid-template-columns: 1fr;
+  }
+
+  .bk-booking {
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .bk-container {
+    padding: 24px 16px 32px;
+  }
+
+  .bk-title {
+    font-size: 1.4rem;
+  }
+}
+
+.bk-hint {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}

@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.http import Http404
 from .decorators import partner_required_session
-from .services import bookings_for_range, build_halfhour_slots, monthly_summary, partner_fields, week_bounds, weekly_grid
+from .services import bookings_for_range, build_halfhour_slots, monthly_summary, partner_fields, week_bounds, weekly_grid, monthly_stats, monthly_income_rows
 
 @partner_required_session
 def day_calendar_view(request):
@@ -104,4 +104,93 @@ def week_calendar_view(request):
     }
     return render(request, 'partners/week.html', ctx)
 
+@partner_required_session
+def month_summary_view(request):
+    """Resumen mensual del partner con métricas clave."""
+    today = timezone.localdate()
+
+    try:
+        year = int(request.GET.get("year", today.year))
+        month = int(request.GET.get("month", today.month))
+        if month < 1 or month > 12:
+            raise ValueError
+    except ValueError:
+        raise Http404("Mes inválido")
+
+    stats = monthly_stats(request.gp_user, year, month)
+
+    ctx = {
+        "section": "month",
+        "year": year,
+        "month": month,
+        **stats,
+    }
+    return render(request, "partners/month.html", ctx)
+
+@partner_required_session
+def monthly_income_view(request):
+    """Tabla detallada de ingresos del mes para el partner."""
+    today = timezone.localdate()
+
+    try:
+        year = int(request.GET.get("year", today.year))
+        month = int(request.GET.get("month", today.month))
+        if month < 1 or month > 12:
+            raise ValueError
+    except ValueError:
+        raise Http404("Mes inválido")
+
+    data = monthly_income_rows(request.gp_user, year, month)
+
+    ctx = {
+        "section": "income",
+        "year": year,
+        "month": month,
+        **data,
+    }
+    return render(request, "partners/income.html", ctx)
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from applications.users.utils import login_required_session
+from applications.field.models import Field, Album
+from .forms import FieldEditForm, AlbumUploadForm
+from applications.users.models import User
+
+@login_required_session
+def edit_field_view(request, ):
+    user = get_object_or_404(User, pk=request.session.get('user_id'))
+
+    # Validamos que el usuario es el dueño
+    field = Field.objects.filter(owner=user).first()
+    if not field:
+        # TODO: podrías redirigir a una vista para crear el local
+        return redirect('field:list')
+
+    if request.method == "POST":
+        form = FieldEditForm(request.POST, instance=field)
+        album_form = AlbumUploadForm(request.POST, request.FILES)
+
+        if form.is_valid() and album_form.is_valid():
+            form.save()
+
+            images = request.FILES.getlist("images")
+            for img in images:
+                Album.objects.create(field=field, image=img)
+
+            messages.success(request, "Local actualizado correctamente.")
+            return redirect("partners:day")
+    else:
+        form = FieldEditForm(instance=field)
+        album_form = AlbumUploadForm()
+
+    # Mostrar todas las imágenes actuales
+    albums = field.albums.all()
+
+    return render(request, "partners/edit_field.html", {
+        "field": field,
+        "form": form,
+        "album_form": album_form,
+        "albums": albums,
+    })
 

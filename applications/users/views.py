@@ -4,6 +4,9 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 from .forms import RegularCreateForm
 from .factories import UserFactory, RegularUserInput
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from .services import user_bookings
 
 def crear_usuario_regular_view(request):
     if request.method == "POST":
@@ -81,3 +84,17 @@ def logout_view(request):
     request.session.flush()          # borra sesión y cookie
     messages.info(request, "Sesión cerrada correctamente")
     return redirect('users:login')
+
+@login_required
+def history_view(request):
+    user = getattr(request, "gp_user", None)
+    if not user:
+        return redirect("users:login")
+
+    bookings = user_bookings(user)
+
+    ctx = {
+        "bookings": bookings,
+        "today": timezone.now(),
+    }
+    return render(request, "users/history.html", ctx)

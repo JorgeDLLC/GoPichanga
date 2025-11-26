@@ -1,0 +1,75 @@
+{% extends "base_partner.html" %}
+
+{% block title %}GO PICHANGA · Ingresos del mes{% endblock %}
+
+{# marcar opción del menú lateral #}
+{% block menu_income_active %}active{% endblock %}
+
+{% block header %}
+  <h1>Ingresos del mes</h1>
+  <p class="income-subtitle">
+    Detalle de reservas e ingresos para
+    <span>{{ month }}/{{ year }}</span>.
+  </p>
+
+  <div class="toolbar">
+    <a href="{% url 'partners:income' %}?year={{ year|add:'-1' }}&month={{ month }}">
+      Hace un año
+    </a>
+    <a href="{% url 'partners:income' %}?year={{ year }}&month={{ month }}">
+      Mes actual
+    </a>
+  </div>
+{% endblock %}
+
+{% block content %}
+  {% if rows %}
+    <div class="income-table-wrapper">
+      <table class="income-table">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Tiempo reservado</th>
+            <th>Ingresos por reserva</th>
+            <th>Ingresos por extras</th>
+            <th>Hora ingreso</th>
+            <th>Hora salida</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr>
+              <td>{{ r.user }}</td>
+              <td class="num">
+                {% if r.hours %}{{ r.hours }} h{% else %}-{% endif %}
+              </td>
+              <td class="num">S/ {{ r.base_amount|floatformat:2 }}</td>
+              <td class="num">S/ {{ r.extras_amount|floatformat:2 }}</td>
+              <td>
+                {% if r.start %}{{ r.start|date:"d/m H:i" }}{% else %}-{% endif %}
+              </td>
+              <td>
+                {% if r.end %}{{ r.end|date:"d/m H:i" }}{% else %}-{% endif %}
+              </td>
+              <td class="num">S/ {{ r.total|floatformat:2 }}</td>
+            </tr>
+          {% endfor %}
+          <tr class="total-row">
+            <td>Total mes</td>
+            <td></td>
+            <td class="num">S/ {{ sum_base|floatformat:2 }}</td>
+            <td class="num">S/ {{ sum_extras|floatformat:2 }}</td>
+            <td></td>
+            <td></td>
+            <td class="num">S/ {{ sum_total|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="income-empty">
+      No hay reservas registradas para este mes.
+    </div>
+  {% endif %}
+{% endblock %}
