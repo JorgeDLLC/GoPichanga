@@ -1,0 +1,52 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}GO PICHANGA{% endblock %}</title>
+
+    <!-- CSS global (navbar + fondo) -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-left">
+        <a href="/" class="brand">GO PICHANGA</a>
+      </div>
+
+      <nav class="topbar-center">
+        {% if request.gp_is_auth %}
+          <a href="#" class="nav-link">Conviértete en arrendatario</a>
+          <a href="{% url 'users:history' %}" class="nav-link">Mis reservas</a>
+
+          <form method="post"
+                action="{% url 'users:logout' %}"
+                class="nav-form">
+            {% csrf_token %}
+            <button type="submit" class="nav-link nav-link--btn">
+              Cerrar sesión
+            </button>
+          </form>
+        {% else %}
+          <a href="{% url 'users:regular_create' %}" class="nav-link">
+            Registrarme
+          </a>
+          <a href="{% url 'users:login' %}" class="nav-link">
+            Iniciar sesión
+          </a>
+        {% endif %}
+      </nav>
+
+      <div class="topbar-right">
+        {% block navbar_filters %}{% endblock %}
+      </div>
+    </header>
+
+    <main class="page-main">
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

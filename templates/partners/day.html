@@ -1,184 +1,37 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <title>GO PICHANGA · Calendario del día</title>
-    <style>
-      :root {
-        --bg: #0b1d22;
-        --side: #0f2a30;
-        --card: #0f242a;
-        --muted: #90a4ae;
-        --text: #e8f0f2;
-        --free: #5f7682;
-        --busy: #0f2a30;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--text);
-        font-family: system-ui, Segoe UI, Roboto, Arial;
-      }
-      .layout {
-        display: grid;
-        grid-template-columns: 280px 1fr;
-        min-height: 100vh;
-      }
-      .side {
-        background: var(--side);
-        padding: 28px;
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-      }
-      .brand {
-        font-weight: 900;
-        font-size: 24px;
-        letter-spacing: 1px;
-        margin-bottom: 6px;
-      }
-      .menu a {
-        display: block;
-        padding: 14px 16px;
-        border-radius: 12px;
-        color: var(--text);
-        text-decoration: none;
-        margin-bottom: 12px;
-        background: #0b2126;
-      }
-      .menu a.active {
-        outline: 2px solid #2b525c;
-      }
-      /* botón logout */
-      .logout-form {
-        margin-top: auto;
-      }
-      .logout-form button {
-        width: 100%;
-        background: #0b2126;
-        color: var(--text);
-        border: 1px solid #173941;
-        border-radius: 12px;
-        padding: 12px 16px;
-        cursor: pointer;
-      }
-      .logout-form button:hover {
-        filter: brightness(1.05);
-      }
+{% extends "base_partner.html" %}
 
-      .main {
-        padding: 28px 34px;
-      }
-      h1 {
-        margin: 0 0 16px;
-      }
-      .toolbar {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        margin-bottom: 12px;
-      }
-      .toolbar a,
-      .toolbar button {
-        background: #0b2126;
-        color: var(--text);
-        border: 1px solid #173941;
-        border-radius: 10px;
-        padding: 8px 12px;
-        text-decoration: none;
-      }
-      .list {
-        display: grid;
-        gap: 12px;
-      }
-      .slot {
-        border-radius: 14px;
-        padding: 14px 16px;
-        border: 1px solid #0b1f24;
-      }
-      .slot.free {
-        background: var(--free);
-        color: #fff;
-      }
-      .slot.busy {
-        background: var(--busy);
-      }
-      .time {
-        font-size: 12px;
-        opacity: 0.85;
-        margin-bottom: 6px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="layout">
-      <aside class="side">
-        <div class="brand">
-          <a
-            href="{% url 'field:list' %}"
-            style="color: inherit; text-decoration: none"
-            >GO PICHANGA</a
-          >
-        </div>
+{% block title %}GO PICHANGA · Calendario del día{% endblock %}
 
-        <nav class="menu">
-          <a href="{% url 'partners:day' %}" class="active"
-            >Calendario del día</a
-          >
-          <a href="{% url 'partners:week' %}">Calendario semanal</a>
-          <a href="{% url 'partners:month' %}">Resumen mensual</a>
-          <a href="#">Ingresos mensuales</a>
-          <a href="#">Editar local</a>
-        </nav>
+{# marcar item de menú como activo #}
+{% block menu_day_active %}active{% endblock %}
 
-        <!-- FORM DE LOGOUT (POST + CSRF) -->
-        <form
-          class="logout-form"
-          method="post"
-          action="{% url 'users:logout' %}"
-        >
-          {% csrf_token %}
-          <button type="submit">Cerrar sesión</button>
-        </form>
-      </aside>
+{% block header %}
+  <h1>Calendario del día</h1>
 
-      <main class="main">
-        <h1>Calendario del día</h1>
+  <div class="toolbar">
+    <a href="{% url 'partners:day' %}?date={{ prev_date }}">&larr; Ayer</a>
+    <a href="{% url 'partners:day' %}?date={{ today }}">Hoy</a>
+    <a href="{% url 'partners:day' %}?date={{ next_date }}">Mañana &rarr;</a>
 
-        <div class="toolbar">
-          <a href="{% url 'partners:day' %}?date={{ prev_date }}"
-            >&larr; Ayer</a
-          >
-          <a href="{% url 'partners:day' %}?date={{ today }}">Hoy</a>
-          <a href="{% url 'partners:day' %}?date={{ next_date }}"
-            >Mañana &rarr;</a
-          >
-
-          <div style="margin-left: auto; opacity: 0.8">
-            Canchas: {{ fields_count }}
-          </div>
-
-          <form method="post" action="{% url 'users:logout' %}">
-            {% csrf_token %}
-            <button type="submit">Cerrar sesión</button>
-          </form>
-        </div>
-
-        <div class="list">
-          {% for s in slot_data %}
-          <div class="slot {{ s.status }}">
-            <div class="time">
-              {{ s.start|date:"H:i" }} – {{ s.end|date:"H:i" }}
-            </div>
-            <div class="label">{{ s.label }}</div>
-          </div>
-          {% endfor %}
-        </div>
-      </main>
+    <div class="toolbar-right">
+      Canchas: {{ fields_count }}
     </div>
-  </body>
-</html>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <div class="list">
+    {% for s in slot_data %}
+      <div class="slot {{ s.status }}">
+        <div class="time">
+          {{ s.start|date:"H:i" }} – {{ s.end|date:"H:i" }}
+        </div>
+        <div class="label">{{ s.label }}</div>
+      </div>
+    {% empty %}
+      <p style="font-size:0.9rem; opacity:0.8;">
+        No hay información para este día.
+      </p>
+    {% endfor %}
+  </div>
+{% endblock %}

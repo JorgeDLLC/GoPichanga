@@ -1,0 +1,58 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>{% block title %}GO PICHANGA · Panel de arrendatario{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{% static 'partners/partner.css' %}">
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="side">
+        <div class="brand">
+          <a
+            href="{% url 'field:list' %}"
+            class="brand-link"
+          >
+            GO PICHANGA
+          </a>
+        </div>
+
+        <nav class="menu">
+          <a href="{% url 'partners:day' %}"
+             class="menu-link {% block menu_day_active %}{% endblock %}">
+            Calendario del día
+          </a>
+          <a href="{% url 'partners:week' %}"
+             class="menu-link {% block menu_week_active %}{% endblock %}">
+            Calendario semanal
+          </a>
+          <a href="{% url 'partners:month' %}"
+             class="menu-link {% block menu_month_active %}{% endblock %}">
+            Resumen mensual
+          </a>
+          <a href="{% url 'partners:income' %}"
+             class="menu-link {% block menu_income_active %}{% endblock %}">
+            Ingresos mensuales
+          </a>
+          <a href="{% url 'partners:edit_field' %}"
+             class="menu-link {% block menu_edit_field_active %}{% endblock %}">
+            Editar local
+          </a>
+        </nav>
+
+        <!-- Logout lateral -->
+        <form class="logout-form" method="post" action="{% url 'users:logout' %}">
+          {% csrf_token %}
+          <button type="submit">Cerrar sesión</button>
+        </form>
+      </aside>
+
+      <main class="main">
+        {% block header %}{% endblock %}
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,129 @@
+{% extends "base_partner.html" %}
+
+{% block title %}GO PICHANGA · Resumen mensual{% endblock %}
+
+{# marcar menú lateral #}
+{% block menu_month_active %}active{% endblock %}
+
+{% block header %}
+  <h1>Resumen mensual</h1>
+  <p class="month-subtitle">
+    Datos para <span>{{ month }}/{{ year }}</span> sobre tus canchas.
+  </p>
+
+  <div class="toolbar">
+    <a href="{% url 'partners:month' %}?year={{ prev_year }}&month={{ prev_month }}">
+      &larr; Mes anterior
+    </a>
+    <a href="{% url 'partners:month' %}?year={{ year }}&month={{ month }}">
+      Mes actual
+    </a>
+    <a href="{% url 'partners:month' %}?year={{ next_year }}&month={{ next_month }}">
+      Siguiente mes &rarr;
+    </a>
+  </div>
+{% endblock %}
+
+{% block content %}
+  <section class="month-grid">
+    <!-- Días con más reservas -->
+    <article class="month-card">
+      <h3 class="month-card__title">Días con más reservas del mes</h3>
+      <div class="month-card__body">
+        {% if days_top %}
+          {% for d in days_top %}
+            <div class="month-list-item">
+              <span>{{ d.d|date:"d/m" }}</span>
+              <span>{{ d.c }} reservas</span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <span class="month-muted">Sin reservas registradas este mes.</span>
+        {% endif %}
+      </div>
+    </article>
+
+    <!-- Ingresos totales -->
+    <article class="month-card">
+      <h3 class="month-card__title">Ingresos totales del mes</h3>
+      <div class="month-card__body">
+        <div class="month-metric">S/ {{ total_income|floatformat:2 }}</div>
+        {% if total_income %}
+          <div class="month-muted">
+            Suma de reservas confirmadas/pagadas.
+          </div>
+        {% else %}
+          <div class="month-muted">
+            No hay ingresos registrados en este mes.
+          </div>
+        {% endif %}
+      </div>
+    </article>
+
+    <!-- Usuarios más frecuentes -->
+    <article class="month-card">
+      <h3 class="month-card__title">Usuarios más frecuentes</h3>
+      <div class="month-card__body">
+        {% if top_users %}
+          {% for u in top_users %}
+            <div class="month-list-item">
+              <span>{{ u.user__nombre }}</span>
+              <span>{{ u.c }} reservas</span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <span class="month-muted">
+            Aún no hay usuarios recurrentes este mes.
+          </span>
+        {% endif %}
+      </div>
+    </article>
+
+    <!-- Equipamiento más solicitado -->
+    <article class="month-card">
+      <h3 class="month-card__title">Equipamiento más solicitado</h3>
+      <div class="month-card__body">
+        {% if top_equipment %}
+          {% for e in top_equipment %}
+            <div class="month-list-item">
+              <span>{{ e.equipment__type }}</span>
+              <span>{{ e.qty }}</span>
+            </div>
+          {% endfor %}
+        {% else %}
+          <span class="month-muted">
+            Sin datos de equipamiento extra o no implementado.
+          </span>
+        {% endif %}
+      </div>
+    </article>
+
+    <!-- Media de reservas por día -->
+    <article class="month-card">
+      <h3 class="month-card__title">Media de reservas por día</h3>
+      <div class="month-card__body">
+        <div class="month-metric">{{ avg_per_day }}</div>
+        <div class="month-muted">
+          Promedio de reservas por día con al menos una reserva.
+        </div>
+      </div>
+    </article>
+
+    <!-- Hora más reservada -->
+    <article class="month-card">
+      <h3 class="month-card__title">Hora del día más reservada</h3>
+      <div class="month-card__body">
+        {% if top_hour != None %}
+          <div class="month-metric">
+            {{ top_hour|stringformat:"02d" }}:00
+          </div>
+          <div class="month-muted">
+            Hora con mayor concentración de inicios de reserva.
+          </div>
+        {% else %}
+          <span class="month-muted">Sin reservas este mes.</span>
+        {% endif %}
+      </div>
+    </article>
+  </section>
+{% endblock %}

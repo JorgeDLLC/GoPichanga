@@ -10,16 +10,18 @@ from .services import confirm_payment_and_create_booking, compute_total
 
 @login_required_session
 def checkout_view(request, field_id):
+    print(">> checkout_view", request.method)  # DEBUG
     field = get_object_or_404(Field, pk=field_id)
     user  = get_object_or_404(User, pk=request.session.get('user_id'))
 
     data = request.POST if request.method == 'POST' else request.GET
+    print("   data keys:", list(data.keys()))  # DEBUG
     try:
         start = datetime.strptime(f"{data.get('date')} {data.get('start_time')}", "%Y-%m-%d %H:%M")
-        end   = datetime.strptime(f"{data.get('end_time')}", "%H:%M").replace(
-            year=start.year, month=start.month, day=start.day
-        )
+        end   = datetime.strptime(f"{data.get('end_time')}", "%H:%M").replace(year=start.year, month=start.month, day=start.day)
+        print("   parsed start/end OK:", start, end)  # DEBUG
     except Exception:
+        print("   ERROR parsing date/time:", e)  # DEBUG
         messages.error(request, "Debes proporcionar fecha y horas válidas.")
         return redirect(reverse('field:list'))
 
@@ -30,24 +32,29 @@ def checkout_view(request, field_id):
         qty = int(data.get(f'quantity_{fe.id}', 0) or 0)
         if qty > 0:
             requested_extras.append({'fe': fe, 'quantity': qty, 'unit_price': fe.price_per_unit})
+    print("   extras count:", len(requested_extras))  # DEBUG
 
     total = compute_total(field.price_hour, start, end, [
         {'quantity': r['quantity'], 'unit_price': r['unit_price']} for r in requested_extras
     ])
-
+    print("   total:", total)  # DEBUG
+    
     if request.method == 'POST':
         form = PaymentForm(request.POST)
+        print("   POST form valid?", form.is_valid())  # DEBUG
         if form.is_valid():
             try:
                 booking, payment, _ = confirm_payment_and_create_booking(
                     user=user, field=field, start=start, end=end,
                     extras=requested_extras, form=form
                 )
+                print("   BOOKING CREATED ID:", booking.id)  # DEBUG
             except ValueError as e:
+                print("   ERROR confirm_payment:", e)  # DEBUG
                 messages.error(request, str(e))
                 return redirect(reverse('field:list'))
             messages.success(request, "¡Pago realizado y reserva creada!")
-            return redirect(reverse('booking:detail', args=[booking.id]))  # crea/asegura esta vista
+            return redirect('users:history')
     else:
         form = PaymentForm()
 

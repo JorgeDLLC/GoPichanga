@@ -5,13 +5,14 @@ from django.urls import reverse
 from django.views.generic import DetailView
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
-
+from django.shortcuts import get_object_or_404, redirect
 from applications.users.models import User
 from applications.field.models import Field, FieldEquipment
 from .forms import BookingForm, ExtrasQuantitiesForm
 from .factories import BookingFactory, ExtraRequest
 from .exceptions import BookingError
-
+from applications.users.utils import login_required_session
+from .models import Booking
 @method_decorator(never_cache, name="dispatch")
 class FieldDetailBookingView(DetailView):
     """
@@ -77,3 +78,31 @@ class FieldDetailBookingView(DetailView):
         ctx["form"] = form
         ctx["extras_form"] = extras_form
         return self.render_to_response(ctx)
+    
+@login_required_session
+def booking_edit_view(request, pk):
+    booking = get_object_or_404(
+        Booking,
+        pk=pk,
+        user__id=request.session.get('user_id')
+    )
+    # Por ahora sólo mostramos un mensaje y volvemos al historial
+    messages.info(request, "La edición de reservas aún no está implementada.")
+    return redirect('users:history')
+
+@login_required_session
+def booking_delete_view(request, pk):
+    booking = get_object_or_404(
+        Booking,
+        pk=pk,
+        user__id=request.session.get('user_id')
+    )
+
+    if request.method == 'POST':
+        booking.delete()
+        messages.success(request, "Reserva eliminada correctamente.")
+        return redirect('users:history')
+
+    # Si alguien entra por GET, simplemente lo regresamos
+    messages.error(request, "Acción no permitida.")
+    return redirect('users:history')
